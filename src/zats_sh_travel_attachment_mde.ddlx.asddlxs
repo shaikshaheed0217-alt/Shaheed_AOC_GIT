@@ -1,0 +1,35 @@
+@Metadata.layer: #CORE
+@UI.headerInfo: {
+    typeName       : 'Attachment'                ,
+    typeNamePlural : 'Attachments'               ,
+    title          :{ value: 'Id' }    ,
+    description    : {  value: 'comment1' }
+}
+annotate view ZATS_SH_TRAVEL_ATTACH_PROJ with
+
+{
+  @UI.facet: [
+               { purpose    : #STANDARD  ,
+                 type       : #IDENTIFICATION_REFERENCE,
+                 label      : 'Attachment Info' ,
+                 position   : 10
+               }
+             ]
+             
+  @UI.identification: [{ position: 10  }]
+  @UI.lineItem:  [{ position: 10 }]
+  Id;
+  @UI.identification: [{ position: 20  }]
+  @UI.lineItem: [{ position: 20 }]
+  Comment1;
+  @UI.identification: [{ position: 30  }]
+  @UI.lineItem: [{ position: 30 }]
+  Attachment;
+  @UI.identification: [{ position: 40  }]
+  @UI.lineItem: [{ position: 40 }]
+  Filename;
+  @UI.identification: [{ position: 50  }]
+  @UI.lineItem: [{ position: 50 }]
+  Filetype;
+ 
+}

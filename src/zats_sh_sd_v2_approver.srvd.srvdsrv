@@ -1,0 +1,14 @@
+@EndUserText.label: 'V2 Service Defination'
+define service ZATS_SH_SD_V2_Approver {
+  expose ZATS_SH_TRAVEL_Approver;
+  expose ZATS_SH_BOOKING_APPROVER;
+  expose /DMO/I_Agency;
+  expose /DMO/I_Customer;
+  expose I_Currency;
+  expose /DMO/I_Overall_Status_VH;
+  expose /DMO/I_Carrier;
+  expose /DMO/I_Connection;
+  expose /DMO/I_Booking_Status_VH;
+  expose /DMO/I_Supplement;
+  expose /DMO/I_SupplementText;
+}

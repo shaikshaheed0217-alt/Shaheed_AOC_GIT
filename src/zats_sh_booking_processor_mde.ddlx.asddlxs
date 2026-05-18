@@ -1,0 +1,59 @@
+@Metadata.layer: #CORE
+@UI.headerInfo: {
+    typeName       : 'Booking'                ,
+    typeNamePlural : 'Bookings'               ,
+    title          :{ value: 'BookingId' }    ,
+    description    : {  value: '_carrier.Name' }
+}
+annotate view ZATS_SH_BOOKING_PROCESSOR with
+
+{
+  @UI.facet: [
+               { purpose    : #STANDARD  ,
+                 type       : #IDENTIFICATION_REFERENCE,
+                 label      : 'Booking Info' ,
+                 position   : 10
+               },
+               { purpose       : #STANDARD  ,
+                 type          : #LINEITEM_REFERENCE,
+                 label         : 'Booking Supplements' ,
+                 position      : 20,
+                 targetElement : '_BookingSupplement'
+    
+               }
+             ]
+  @UI.identification: [{ position: 10  }]
+  @UI.lineItem:  [{ position: 10 }]
+  BookingId;
+  @UI.identification: [{ position: 20  }]
+  @UI.lineItem: [{ position: 20 }]
+  BookingDate;
+  @UI.identification: [{ position: 30  }]
+  @UI.lineItem: [{ position: 30 }]
+  CustomerId;
+  @UI.identification: [{ position: 40  }]
+  @UI.lineItem: [{ position: 40 }]
+  CarrierId;
+  @UI.identification: [{ position: 50  }]
+  @UI.lineItem: [{ position: 50 }]
+  ConnectionId;
+  @UI.identification: [{ position: 60  }]
+  @UI.lineItem: [{ position: 60 }]
+  FlightDate;
+  @UI.identification: [{ position: 70  }]
+  @UI.lineItem: [{ position: 70 }]
+  FlightPrice;
+  //    CurrencyCode;
+  @UI.identification: [{ position: 80  }]
+  @UI.lineItem: [{ position: 80 }]
+  BookingStatus;
+  //    LastChangedAt;
+  //    /* Associations */
+  //    _bookingStatus;
+  //    _BookingSupplement;
+  //    _carrier;
+  //    _connection;
+  //    _customer;
+  //    _travel;
+  //
+}

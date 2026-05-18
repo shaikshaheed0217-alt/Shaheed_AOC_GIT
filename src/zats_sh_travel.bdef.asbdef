@@ -1,0 +1,194 @@
+managed;
+//
+strict ( 2 );
+
+//Step:1=>Adding Draft in the Behaviour Defination :
+with draft;
+
+//Define the Behaviour for root Entity
+define behavior for ZATS_SH_TRAVEL alias Travel
+implementation in class zbp_ats_sh_travel unique
+//Telling RAP framework to insert the data in this DB table for Travel Request
+persistent table /dmo/travel_m
+
+//How the RAP should handle the lock --> If the travel request is locked
+//the other user's cannot edits the childs --> like its booking & Supplements
+//It is optimistic Lock
+lock master
+total etag LastChangedAt
+//Controls the Permission of BO
+authorization master ( instance )
+//Step:1=>Specify the Draft Table : will be created by RAP framework :
+draft table zats_sd_travel
+etag master LastChangedAt
+early numbering
+{
+  create ( precheck, authorization : global );
+  update ( precheck );
+  delete;
+  field ( readonly ) TravelId, CreatedAt, TotalPrice, CreatedBy, LastChangedAt, LastChangedBy;
+  field ( mandatory ) CustomerId, AgencyId;
+
+  //Dynamic Feature Control :   METHOD get_instance_features
+  //Add Draft
+  association _Booking { create ( features : instance ); with draft; }
+  association _Attachment { create ; with draft; }
+
+  //Internal action-Reusable :
+
+  internal action reCalcTotalPrice;
+
+  //Determination :
+
+  determination calculateTotalPrice on modify { create; field BookingFee, CurrencyCode; }
+
+  //Factory Action-Instance :
+  factory action copyTravel [1];
+  //Non Factory Action-Modifies the Existing BO Instance :
+  action ( features : instance )acceptTravel result[1] $self;
+  action ( features : instance )rejectTravel result[1] $self;
+
+  //Validation :
+
+  validation validateHeaderData on save { create; field CustomerId, BeginDate, EndDate; }
+
+  //Determine action for draft :
+  determine action validationCustomer { validation validateHeaderData; }
+
+
+  //Adding Side Effects :
+  side effects
+  { field BookingFee affects field TotalPrice;
+    determine action validationCustomer executed on field CustomerId affects messages; }
+
+  //Adding the Draft actions :
+  draft determine action Prepare;
+  draft action Edit;
+  draft action Resume;
+  draft action Activate;
+  draft action Discard;
+
+
+
+  mapping for /dmo/travel_m
+    {
+      TravelId      = travel_id;
+      AgencyId      = agency_id;
+      CustomerId    = customer_id;
+      BeginDate     = begin_date;
+      EndDate       = end_date;
+      BookingFee    = booking_fee;
+      TotalPrice    = total_price;
+      CurrencyCode  = currency_code;
+      Description   = description;
+      OverallStatus = overall_status;
+      CreatedBy     = created_by;
+      CreatedAt     = created_at;
+      LastChangedBy = last_changed_by;
+      LastChangedAt = last_changed_at;
+    }
+}
+
+//Define the Behaviour for Child Entity
+define behavior for ZATS_SH_BOOKING alias Booking
+implementation in class zbp_ats_sh_Booking unique
+//Telling RAP framework to insert the data in this DB table for Booking Request
+persistent table /dmo/booking_m
+//Draft table for booking :
+draft table zats_sd_booking
+lock dependent by _travel
+authorization dependent by _travel
+etag master LastChangedAt
+early numbering
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId;
+  //Draft added :
+  association _travel { with draft; }
+  //Draft Added :
+  association _BookingSupplement { create; with draft; }
+
+  //Determination :
+
+  determination calculateTotalPrice on modify { field FlightPrice, CurrencyCode; }
+
+  //Sideeffect :
+
+  side effects { field FlightPrice affects field _travel.TotalPrice; }
+
+  mapping for /dmo/booking_m
+    {
+      TravelId      = travel_id;
+      BookingId     = booking_id;
+      BookingDate   = booking_date;
+      CustomerId    = customer_id;
+      CarrierId     = carrier_id;
+      ConnectionId  = connection_id;
+      FlightDate    = flight_date;
+      FlightPrice   = flight_price;
+      CurrencyCode  = currency_code;
+      BookingStatus = booking_status;
+      LastChangedAt = last_changed_at;
+    }
+}
+
+//Define the Behaviour for Child Entity
+define behavior for ZATS_SH_BookSuppl alias BookSuppl
+implementation in class zbp_ats_sh_BookSuppl unique
+//Telling RAP framework to insert the data in this DB table for Booking Supplement Request
+persistent table /dmo/booksuppl_m
+//Draft table for booking Supplements :
+draft table zats_sd_bksup
+lock dependent by _travel
+authorization dependent by _travel
+etag master LastChangedAt
+early numbering
+{
+  update;
+  delete;
+  field ( readonly ) TravelId, BookingId, BookingSupplementId;
+  association _travel { with draft; }
+  association _Booking { with draft; }
+  mapping for /dmo/booksuppl_m
+    {
+      TravelId            = travel_id;
+      BookingId           = booking_id;
+      BookingSupplementId = booking_supplement_id;
+      SupplementId        = supplement_id;
+      Price               = Price;
+      CurrencyCode        = currency_code;
+      LastChangedAt       = last_changed_at;
+    }
+}
+
+//Define the Attachment
+define behavior for ZATS_SH_ATTACHMENT alias Attachment
+implementation in class zbp_ats_sh_tra_att unique
+//Telling RAP framework to insert the data in this DB table for Booking Request
+persistent table zats_sh_trv_att
+
+lock dependent by _travel
+authorization dependent by _travel
+etag master LastChangedAt
+//Draft table for booking :
+draft table zats_tra_att_d
+{
+  update;
+  delete;
+  field ( numbering : managed ) id;
+  field ( readonly ) TravelId, id;
+  //Draft added :
+  association _travel { with draft; }
+
+  mapping for zats_sh_trv_att
+    {
+      TravelId      = travel_id;
+      Id            = id;
+      Attachment    = attachment;
+      Comment1      = comment1;
+      Filename      = filename;
+      Filetype      = filetype;
+      LastChangedAt = lastchangedat;
+    }
+}
